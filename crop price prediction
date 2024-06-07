@@ -1,0 +1,59 @@
+import pandas as pd
+
+# Load the dataset
+file_path = 'dataset_42_soybean.csv'
+soybean_data = pd.read_csv(file_path)
+
+# Display the first few rows of the dataset
+print("First few rows of the dataset:")
+print(soybean_data.head())
+
+# Display basic information about the dataset
+print("\nBasic Information:")
+print(soybean_data.info())
+
+# Check for missing values
+print("\nMissing Values:")
+print(soybean_data.isnull().sum())
+
+# Summary statistics
+print("\nSummary Statistics:")
+print(soybean_data.describe(include='all'))
+
+# Distribution of classes
+print("\nClass Distribution:")
+print(soybean_data['class'].value_counts())
+
+# Example preprocessing: Encoding categorical variables
+from sklearn.preprocessing import LabelEncoder
+
+label_encoders = {}
+for column in soybean_data.select_dtypes(include=['object']).columns:
+    if column != 'class':  # We don't want to encode the target variable yet
+        label_encoders[column] = LabelEncoder()
+        soybean_data[column] = label_encoders[column].fit_transform(soybean_data[column])
+
+# Encode the target variable
+class_le = LabelEncoder()
+soybean_data['class'] = class_le.fit_transform(soybean_data['class'])
+
+# Split the data into features and target variable
+X = soybean_data.drop('class', axis=1)
+y = soybean_data['class']
+
+# Example: Split the data into training and testing sets
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Example: Train a simple classifier
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(X_train, y_train)
+
+# Evaluate the classifier
+from sklearn.metrics import accuracy_score, classification_report
+
+y_pred = clf.predict(X_test)
+print("\nAccuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
